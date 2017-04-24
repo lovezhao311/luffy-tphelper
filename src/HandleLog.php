@@ -56,7 +56,7 @@ class HandleLog
         $options = array_merge(Config::get('handle_log', []), $options);
         $class = "\\luffyzhao\\helper\\handlelog\\driver\\" . ucfirst($options['type']);
         if (!class_exists($class)) {
-            $module = Request::instance()->module();
+            $module = request()->module();
             $class = Loader::parseClass($module, 'handlelog', 'driver\\' . ucfirst($options['type']));
             if (!class_exists($class)) {
                 throw new Exception("操作日志驱动[{$class}]不存在！");
