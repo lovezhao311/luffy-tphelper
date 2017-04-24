@@ -1,0 +1,17 @@
+{
+    "name": "luffyzhao/helper",
+    "description": "thinkphp 5.0.7 函数助手",
+    "authors": [
+        {
+            "name": "luffyzhao",
+            "email": "luffyzhao@vip.126.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "topthink/framework": "5.0.7"
+    },
+    "autoload": {
+        "psr-4": {"luffyzhao\\helper\\": "src/"}
+    }
+}
