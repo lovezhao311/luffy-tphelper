@@ -25,8 +25,8 @@ class Search
     public function __construct()
     {
         $this->request = request();
-        $cofing = (array) Config::get('search');
-        $this->cofing = array($this->cofing, $config);
+        $config = (array) Config::get('search');
+        $this->config = array($this->config, $config);
     }
     /**
      * [getRules description]
