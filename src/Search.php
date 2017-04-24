@@ -137,8 +137,34 @@ class Search
     protected function params()
     {
         $params = $this->request->param($this->config['method_suffix']);
-        ArrayHelper::removeEmpty($params);
+        $this->removeEmpty($params);
         view()->assign('search', $params);
         return $params;
+    }
+    /**
+     * 删除空数组
+     * @method   removeEmpty
+     * @DateTime 2017-04-24T17:55:11+0800
+     * @param    [type]                   &$arr [description]
+     * @param    bool                     $trim [description]
+     * @return   [type]                         [description]
+     */
+    protected function removeEmpty(&$arr, $trim = true)
+    {
+        if (empty($arr)) {
+            return [];
+        }
+        foreach ($arr as $key => $value) {
+            if (is_array($value)) {
+                self::removeEmpty($arr[$key]);
+            } else {
+                $value = ($trim && is_string($value)) ? trim($value) : $value;
+                if ($value === '' || $value === null) {
+                    unset($arr[$key]);
+                } elseif ($trim) {
+                    $arr[$key] = $value;
+                }
+            }
+        }
     }
 }
