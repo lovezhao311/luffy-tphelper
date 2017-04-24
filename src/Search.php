@@ -26,7 +26,7 @@ class Search
     {
         $this->request = request();
         $config = (array) Config::get('search');
-        $this->config = array($this->config, $config);
+        $this->config = array_merge($this->config, $config);
     }
     /**
      * [getRules description]
