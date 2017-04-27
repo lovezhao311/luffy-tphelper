@@ -2,6 +2,9 @@
 namespace luffyzhao\helper;
 
 use think\Config;
+use think\db\Query;
+use think\Exception;
+use think\Model;
 
 /**
  * 用法
@@ -26,13 +29,17 @@ class Search
         $this->request = request();
     }
     /**
-     * [getRules description]
-     * @method   getRules
-     * @DateTime 2017-03-02T17:01:59+0800
-     * @return   [type]                   [description]
+     * 执行搜索
+     * @method   check
+     * @DateTime 2017-04-27T12:11:21+0800
+     * @param    Query|Model                   $query [description]
+     * @return   [type]                          [description]
      */
-    public function check(Query $query)
+    public function check($query)
     {
+        if (!($query instanceof Query || $query instanceof Model)) {
+            throw new Exception('参数错误！');
+        }
         if (empty($this->params())) {
             return $query;
         }
@@ -88,13 +95,14 @@ class Search
 
     }
     /**
-     * [value description]
-     * @method   value
-     * @DateTime 2017-04-25T10:59:44+0800
-     * @param    [type]                   $value [description]
-     * @param    [type]                   $item  [description]
-     * @param    [type]                   $data  [description]
-     * @return   [type]                          [description]
+     * 获取每项的“真实值”
+     * @method   item
+     * @DateTime 2017-04-27T12:13:53+0800
+     * @param    [type]                   $type [description]
+     * @param    [type]                   $key  [description]
+     * @param    [type]                   $item [description]
+     * @param    array                    $data [description]
+     * @return   [type]                         [description]
      */
     protected function item($type, $key, $item, array $data)
     {
