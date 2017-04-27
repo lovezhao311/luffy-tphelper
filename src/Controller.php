@@ -142,7 +142,10 @@ class Controller extends \think\Controller
     protected function success($msg = '', $url = null, $data = '', $wait = 3, array $header = [])
     {
         Hook::listen('handle_success', $msg);
-        parent::success($msg . '成功', $url, $data, $wait, $header);
+        if (!is_numeric($msg)) {
+            $msg .= '成功';
+        }
+        parent::success($msg, $url, $data, $wait, $header);
     }
     /**
      * [_empty description]
