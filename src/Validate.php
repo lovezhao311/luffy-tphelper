@@ -89,19 +89,21 @@ class Validate extends \think\Validate
     }
 
     /**
-     * 验证某个字段的值等于 x 时候必须
-     * @param  [type] $value [description]
-     * @param  [type] $data  [description]
-     * @return [type]        [description]
+     * 验证某个字段不等于某个值的时候必须
+     * @access protected
+     * @param mixed     $value  字段值
+     * @param mixed     $rule  验证规则
+     * @param array     $data  数据
+     * @return bool
      */
-    protected function requireWithForVal($value, $rule, $data, $field, $title)
+    protected function requireIfNot($value, $rule, $data)
     {
-        list($field, $val) = explode(',', $rule, 2);
-
-        if (isset($data[$field]) && $data[$field] == $val && trim($value) == '') {
-            return $title . '不正确';
+        list($field, $val) = explode(',', $rule);
+        if ($this->getDataValue($data, $field) != $val) {
+            return !empty($value);
+        } else {
+            return true;
         }
-        return true;
     }
 
     /**
