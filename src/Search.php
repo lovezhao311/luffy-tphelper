@@ -6,6 +6,7 @@ use think\db\Query;
 use think\Exception;
 use think\Loader;
 use think\Model;
+use think\View;
 
 /**
  * 用法
