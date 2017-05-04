@@ -4,6 +4,7 @@ namespace luffyzhao\helper;
 use think\Config;
 use think\db\Query;
 use think\Exception;
+use think\Loader;
 use think\Model;
 
 /**
