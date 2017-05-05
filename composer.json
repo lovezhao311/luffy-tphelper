@@ -9,7 +9,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "topthink/framework": "^5.0.7"
+        "topthink/framework": "^5.0"
     },
     "autoload": {
         "psr-4": {"luffyzhao\\helper\\": "src/"}
