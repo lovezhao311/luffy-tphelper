@@ -106,7 +106,7 @@ class Controller extends \think\Controller
             throw new Exception("操作失败，请刷新页面重试！");
         }
         $this->trigger($query, $where, 'delete');
-        if ($query->delete() === false) {
+        if ($query->where($where)->delete() === false) {
             $error = $query->getError() ?: '操作失败，请刷新页面重试！';
             throw new Exception($error);
         }
