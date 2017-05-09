@@ -63,7 +63,7 @@ class Controller extends \think\Controller
      * @param    array                    $where    更新条件
      * @return   [type]                            [description]
      */
-    protected function save(&$query, array $where = [], $scene = 'add', array $data = [], $method = 'post', $name = 'data/a', bool $allowField = true)
+    protected function save(&$query, array $where = [], string $scene = 'add', array $data = [], string $method = 'post', string $name = 'data/a', $allowField = true)
     {
         if (!($query instanceof \think\Model)) {
             throw new Exception("操作失败，请刷新页面重试！");
