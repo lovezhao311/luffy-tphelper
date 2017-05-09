@@ -17,22 +17,29 @@ class Validate extends \think\Validate
      * @param    [type]                   $data [description]
      * @return   [type]                         [description]
      */
-    public function checkField(array $data = [], array $rules = [], string $scene = '')
+    public function checkField()
     {
-        if (empty($rules)) {
-            $rules = $this->requireField;
-        }
-        if (empty($data)) {
-            $data = request()->post('data/a');
-        }
-        if ($scene === '') {
-            $scene = strtolower(request()->action());
-        }
-        if (!isset($rules[$scene])) {
+        if (empty($this->requireField)) {
             return true;
         }
+
+        $scene = strtolower(request()->action());
+        if (!isset($this->requireField[$scene]) || empty($this->requireField[$scene])) {
+            return true;
+        }
+
+        if (request()->isPost()) {
+            $data = request()->post('data/a');
+        } else {
+            $data = request()->get('data/a');
+        }
+
+        if (empty($data)) {
+            return true;
+        }
+
         $request = array_keys($data);
-        $regular = $rules[$scene];
+        $regular = $this->requireField[$scene];
         foreach ($request as $key => $value) {
             if (!in_array($value, $regular)) {
                 $this->error = "请求非法:{$value}";
