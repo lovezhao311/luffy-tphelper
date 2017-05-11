@@ -4,7 +4,7 @@ namespace luffyzhao\helper;
 /**
  *
  */
-class Command extends think\console\Command
+class Command extends \think\console\Command
 {
     /**
      * 文件锁
