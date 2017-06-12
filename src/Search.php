@@ -28,6 +28,7 @@ class Search
 
     public function __construct()
     {
+        $this->config = array_merge($this->config, Config::get('search'));
         $this->request = request();
     }
     /**

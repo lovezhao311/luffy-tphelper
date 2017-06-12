@@ -6,49 +6,6 @@ use think\Db;
 class Validate extends \think\Validate
 {
     /**
-     * 请求字段
-     * @var array
-     */
-    protected $requireField = [];
-    /**
-     * 验证请求的合法性
-     * @method   checkField
-     * @DateTime 2017-04-22T15:02:35+0800
-     * @param    [type]                   $data [description]
-     * @return   [type]                         [description]
-     */
-    public function checkField()
-    {
-        if (empty($this->requireField)) {
-            return true;
-        }
-
-        $scene = strtolower(request()->action());
-        if (!isset($this->requireField[$scene]) || empty($this->requireField[$scene])) {
-            return true;
-        }
-
-        if (request()->isPost()) {
-            $data = request()->post('data/a');
-        } else {
-            $data = request()->get('data/a');
-        }
-
-        if (empty($data)) {
-            return true;
-        }
-
-        $request = array_keys($data);
-        $regular = $this->requireField[$scene];
-        foreach ($request as $key => $value) {
-            if (!in_array($value, $regular)) {
-                $this->error = "请求非法:{$value}";
-                return false;
-            }
-        }
-        return true;
-    }
-    /**
      * 验证是否存在！
      * @author luffy<luffyzhao@vip.126.com>
      * @dateTime 2016-04-19T09:48:57+0800

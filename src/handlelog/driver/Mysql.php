@@ -3,9 +3,22 @@ namespace luffyzhao\helper\handlelog\driver;
 
 use think\Db;
 use think\Exception;
-use think\exception\PDOException;
 use think\Validate;
 
+/**
+ *
+ *
+CREATE TABLE IF NOT EXISTS `{$this->config['table_name']}` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`user_id` int(11) NOT NULL COMMENT '操作用户',
+`route` varchar(50) NOT NULL COMMENT '路由地址',
+`msg` varchar(255) NOT NULL COMMENT '操作说明',
+`params` text COMMENT '请求参数',
+`create_time` datetime DEFAULT NULL,
+`modify_time` datetime DEFAULT NULL COMMENT '日志表',
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='操作日志表';
+ */
 class Mysql
 {
     /**
@@ -26,24 +39,6 @@ class Mysql
     public function __construct($config = [])
     {
         $this->config = array_merge($this->config, $config);
-        // 数据库不存在就新建数据库
-        try {
-            Db::connect()->getTables($this->config['table_name']);
-        } catch (\PDOException $e) {
-            $sql = <<<EOT
-CREATE TABLE IF NOT EXISTS `{$this->config['table_name']}` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL COMMENT '操作用户',
-  `route` varchar(50) NOT NULL COMMENT '路由地址',
-  `msg` varchar(255) NOT NULL COMMENT '操作说明',
-  `params` text COMMENT '请求参数',
-  `create_time` datetime DEFAULT NULL,
-  `modify_time` datetime DEFAULT NULL COMMENT '日志表',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='操作日志表';
-EOT;
-            Db::connect()->execute($sql);
-        }
     }
     /**
      *
@@ -55,7 +50,7 @@ EOT;
     public function save($data)
     {
         $this->validate($data);
-        $sql = "INSERT INTO `handle_log` (`user_id`, `route`, `msg`, `params`, `create_time`, `modify_time`) VALUES (:user_id, :route, :msg, :params, :create_time, :modify_time);";
+        $sql = "INSERT INTO `{$this->config['table_name']}` (`user_id`, `route`, `msg`, `params`, `create_time`, `modify_time`) VALUES (:user_id, :route, :msg, :params, :create_time, :modify_time);";
         return Db::connect()->query($sql, $data);
     }
 
