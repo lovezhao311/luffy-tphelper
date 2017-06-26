@@ -14,7 +14,7 @@ class Service
 
     public function __construct()
     {
-        $model = $this->class();
+        $model = $this->model();
         $this->model = Loader::model($model);
     }
 
@@ -24,9 +24,9 @@ class Service
      * @DateTime 2017-03-10T18:02:49+0800
      * @return   [type]                   [description]
      */
-    function class ()
+    public function model()
     {
-        $name = StrReplace('\\', '/', get_class($this));
+        $name = str_replace('\\', '/', get_class($this));
         return basename($name);
     }
     /**
