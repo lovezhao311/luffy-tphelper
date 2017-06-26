@@ -1,7 +1,9 @@
 <?php
 namespace luffyzhao\helper;
 
+use think\Exception;
 use think\exception\ClassNotFoundException;
+use think\exception\ValidateException;
 use think\Hook;
 use think\Loader;
 
@@ -43,6 +45,28 @@ class Controller extends \think\Controller
     {
         Hook::listen('handle_success', $msg);
         parent::success($msg, $url, $data, $wait, $header);
+    }
+
+    /**
+     * 验证数据
+     * @access protected
+     * @param array        $data     数据
+     * @param string|array $validate 验证器名或者验证规则数组
+     * @param array        $message  提示信息
+     * @param bool         $batch    是否批量验证
+     * @param mixed        $callback 回调方法（闭包）
+     * @return array|string|true
+     * @throws ValidateException
+     */
+    protected function validate($data, $validate, $message = [], $batch = false, $callback = null)
+    {
+        $this->validateFailException(true);
+        $this->batchValidate = true;
+        try {
+            parent::validate($data, $validate, $message, $batch, $callback);
+        } catch (ValidateException $e) {
+            throw new Exception($e->getMessage());
+        }
     }
     /**
      * [_empty description]
