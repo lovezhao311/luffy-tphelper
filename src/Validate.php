@@ -149,17 +149,4 @@ class Validate extends \think\Validate
         }
     }
 
-    /**
-     * 汉字、字母、数字和 , 号
-     * @method   formerSpec
-     * @DateTime 2017-04-22T11:03:14+0800
-     * @return   [type]                   [description]
-     */
-    protected function chsAlphaNumComma($value, $rule, $data, $field, $title)
-    {
-        if ($this->regex($value, '/^[\x{4e00}-\x{9fa5}a-zA-Z0-9,]+$/u')) {
-            return true;
-        }
-        return $title . '只能是汉字、字母、数字和 , 号';
-    }
 }

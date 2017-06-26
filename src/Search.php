@@ -4,7 +4,6 @@ namespace luffyzhao\helper;
 use think\Config;
 use think\db\Query;
 use think\Exception;
-use think\Loader;
 use think\Model;
 use think\View;
 
@@ -19,17 +18,51 @@ use think\View;
  */
 class Search
 {
-
+    /**
+     * 请求方式
+     * @var string
+     */
+    protected $method = 'GET';
+    /**
+     * 搜索规则
+     * @var null
+     */
     protected $rules = null;
-    protected $request = null;
+    /**
+     * 数据库Query对象
+     * @var null
+     */
+    protected $query = null;
+    /**
+     * 请求参数
+     * @var null
+     */
+    protected $params = null;
+    /**
+     * 配置
+     * @var [type]
+     */
     protected $config = [
-        'method_suffix' => 'search/a',
+        'method' => 'search/a',
     ];
-
-    public function __construct()
+    /**
+     * 构造函数
+     * @method   __construct
+     * @DateTime 2017-06-24T12:11:06+0800
+     * @param    [type]                   $query [description]
+     */
+    public function __construct($query)
     {
-        $this->config = array_merge($this->config, Config::get('search'));
-        $this->request = request();
+        if (!($query instanceof Query)) {
+            throw new Exception('参数错误！');
+        }
+        //
+        $this->query = $query;
+        // 合并配置
+        if (Config::has('search')) {
+            $this->config = array_merge($this->config, Config::get('search'));
+        }
+
     }
     /**
      * 执行搜索
@@ -38,102 +71,93 @@ class Search
      * @param    Query|Model                   $query [description]
      * @return   [type]                          [description]
      */
-    public function check($query)
+    public function run()
     {
-        if (!($query instanceof Query || $query instanceof Model)) {
-            throw new Exception('参数错误！');
-        }
         if (empty($this->params())) {
-            return $query;
+            return $this->query;
         }
         if (empty($this->rules)) {
-            return $query;
+            return $this->query;
         }
-        $action = $this->request->action();
-        if (!isset($this->rules[$action])) {
-            return $query;
-        }
-
-        $rules = $this->rules[$action];
 
         foreach ($rules as $key => $value) {
-            $this->checkItem($query, $key, $value);
+            try {
+                $rule = $this->getRule($value, $key);
+            } catch (Exception $e) {
+                continue;
+            }
+
+            $this->query = call_user_func_array([$this->query, 'where'], [$rule['field'], $rule['exp'], $rule['value']]);
         }
 
         View::instance(Config::get('template'), Config::get('view_replace_str'))->assign('search', $this->params());
-        return $query;
+        return $this->query;
     }
+
     /**
-     * 获取查询条件
-     * @method   getItem
-     * @DateTime 2017-04-25T10:58:01+0800
-     * @param    [type]                   $key  [description]
-     * @param    [type]                   $item [description]
-     * @return   [type]                         [description]
+     * [getRule description]
+     * @method   getRule
+     * @DateTime 2017-06-24T12:20:20+0800
+     * @param    [type]                   $value [description]
+     * @return   [type]                          [description]
      */
-    protected function checkItem(&$query, $key, $item)
+    protected function getRule($rule, $searchKey)
     {
-        $data = $this->params();
-        if (!isset($data[$key])) {
-            return false;
-        }
+        $rule = $this->mergeDefault($rule, $searchKey);
 
-        $value = $this->item('value', $key, $item, $data);
-        $field = $this->item('field', $key, $item, $data);
-        $function = $this->item('function', $key, $item, $data);
-        $op = $this->item('op', $key, $item, $data);
-
-        switch ($function) {
-            case 'whereLike':
-                $value = "{$value}%";
-                call_user_func_array([$query, 'whereLike'], [$field, $value]);
-                break;
-            case 'order':
-                call_user_func_array([$query, 'order'], [$value]);
-                break;
-            default:
-                call_user_func_array([$query, $function], [$field, $op, $value]);
-                break;
-        }
-
-    }
-    /**
-     * 获取每项的“真实值”
-     * @method   item
-     * @DateTime 2017-04-27T12:13:53+0800
-     * @param    [type]                   $type [description]
-     * @param    [type]                   $key  [description]
-     * @param    [type]                   $item [description]
-     * @param    array                    $data [description]
-     * @return   [type]                         [description]
-     */
-    protected function item($type, $key, $item, array $data)
-    {
-        $action = request()->action();
-        $method = 'get' . Loader::parseName($action . '_' . $key . '_' . $type, 1) . 'Attr';
-        $method1 = 'get' . Loader::parseName($key . '_' . $type, 1) . 'Attr';
-        if (method_exists($this, $method)) {
-            $default = call_user_func_array([$this, $method], [$data[$key], $item, $data]);
-        } else if (method_exists($this, $method1)) {
-            $default = call_user_func_array([$this, $method1], [$data[$key], $item, $data]);
-        } else {
-            switch ($type) {
-                case 'value':
-                    $default = $data[$key];
-                    break;
-                case 'function':
-                    $default = isset($item[0]) ? $item[0] : 'where';
-                    break;
-                case 'op':
-                    $default = isset($item[2]) ? $item[2] : '=';
-                    break;
-                case 'field':
-                    $default = isset($item[1]) ? $item[1] : $key;
+        foreach ($default as $key => $value) {
+            $method = 'get' . Loader::parseName($key . '_' . $searchKey, 1) . 'Attr';
+            if (method_exists($this, $method)) {
+                $rule[$key] = $this->$method();
             }
         }
-        return $default;
+
+        $rule['value'] = $this->value($searchKey, $rule);
+
+        return $rule;
     }
 
+    /**
+     * 搜索条件值
+     * @method   value
+     * @DateTime 2017-06-24T14:42:42+0800
+     * @param    string                   $value [description]
+     * @return   [type]                          [description]
+     */
+    public function value($searchKey, $rule)
+    {
+        $params = $this->params();
+        $method = 'get' . Loader::parseName('value_' . $searchKey, 1) . 'Attr';
+
+        if (method_exists($this, $method)) {
+            $value = $this->$method();
+        } else if (isset($params[$searchKey])) {
+            $value = $params[$searchKey];
+        } else if ($rule['default'] != null) {
+            $value = $rule['default'];
+        } else {
+            throw new Exception('搜索条件不存在.');
+        }
+
+        return ($rule['exp'] == 'like') ? $value . '%' : $value;
+    }
+    /**
+     * 合并默认参数
+     * @method   mergeDefault
+     * @DateTime 2017-06-24T14:41:05+0800
+     * @param    [type]                   $rule [description]
+     * @return   [type]                         [description]
+     */
+    protected function mergeDefault($rule, $searchKey)
+    {
+        $default = [
+            'default' => null,
+            'field' => $searchKey,
+            'exp' => '=',
+        ];
+
+        return array_merge($default, $rule);
+    }
     /**
      * 获取搜索参数
      * @method   params
@@ -142,10 +166,13 @@ class Search
      */
     protected function params()
     {
-        $params = $this->request->param($this->config['method_suffix']);
-        $this->removeEmpty($params);
-        view()->assign('search', $params);
-        return $params;
+        if ($this->params !== null) {
+            $params = ($this->method == 'POST') ? request()->post($this->config['method']) : request()->get($this->config['method']);
+            $this->removeEmpty($params);
+            view()->assign('search', $params);
+            $this->params = $params;
+        }
+        return $this->params;
     }
     /**
      * 删除空数组
