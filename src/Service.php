@@ -52,8 +52,9 @@ class Service
      * @param    string                   $value [description]
      * @return   [type]                          [description]
      */
-    public function handle(array $data, array $where = [], string $type = 'add')
+    public function handle(array $data, string $type = 'add',array $where = [])
     {
         $this->filedset($type)->save($data, $where);
+        return $this->model;
     }
 }

@@ -6,6 +6,7 @@ use think\db\Query;
 use think\Exception;
 use think\Model;
 use think\View;
+use think\Loader;
 
 /**
  * 用法
@@ -51,19 +52,29 @@ class Search
      * @DateTime 2017-06-24T12:11:06+0800
      * @param    [type]                   $query [description]
      */
-    public function __construct($query)
+    public function __construct()
     {
-        if (!($query instanceof Query)) {
-            throw new Exception('参数错误！');
-        }
-        //
-        $this->query = $query;
         // 合并配置
         if (Config::has('search')) {
             $this->config = array_merge($this->config, Config::get('search'));
         }
 
     }
+
+    /**
+     * 设置query
+     * @param $query
+     * @throws Exception
+     */
+    public  function  setQuery($query){
+        if (!($query instanceof Query)) {
+            throw new Exception('参数错误！');
+        }
+        //
+        $this->query = $query;
+    }
+
+
     /**
      * 执行搜索
      * @method   check
@@ -73,14 +84,11 @@ class Search
      */
     public function run()
     {
-        if (empty($this->params())) {
-            return $this->query;
-        }
         if (empty($this->rules)) {
             return $this->query;
         }
 
-        foreach ($rules as $key => $value) {
+        foreach ($this->rules as $key => $value) {
             try {
                 $rule = $this->getRule($value, $key);
             } catch (Exception $e) {
@@ -105,7 +113,7 @@ class Search
     {
         $rule = $this->mergeDefault($rule, $searchKey);
 
-        foreach ($default as $key => $value) {
+        foreach ($rule as $key => $value) {
             $method = 'get' . Loader::parseName($key . '_' . $searchKey, 1) . 'Attr';
             if (method_exists($this, $method)) {
                 $rule[$key] = $this->$method();
@@ -166,10 +174,9 @@ class Search
      */
     protected function params()
     {
-        if ($this->params !== null) {
-            $params = ($this->method == 'POST') ? request()->post($this->config['method']) : request()->get($this->config['method']);
+        if ($this->params === null) {
+            $params = request()->param($this->config['method']);
             $this->removeEmpty($params);
-            view()->assign('search', $params);
             $this->params = $params;
         }
         return $this->params;

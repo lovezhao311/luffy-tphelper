@@ -17,19 +17,25 @@ class Controller extends \think\Controller
      * 获取搜索参数
      * 去除empty
      * @method   search
+     * @method   special
      * @DateTime 2017-03-02T15:28:09+0800
      * @return   [type]                   [description]
      */
-    protected function search($query)
+    protected function search($query,$special="")
     {
         // 通过控制器去找对应search过滤规则
-        $search = $this->request->controller();
+        if(empty($special)){
+            $search = $this->request->controller();
+        }else{
+            $search = $special;
+        }
         try {
             $class = Loader::model($search, 'search');
+            $class->setQuery($query);
         } catch (ClassNotFoundException $e) {
             return $query;
         }
-        return $class->check($query);
+        return $class->run();
     }
     /**
      * 操作成功跳转的快捷方法
@@ -68,6 +74,10 @@ class Controller extends \think\Controller
             throw new Exception($e->getMessage());
         }
     }
+
+
+
+
     /**
      * [_empty description]
      * @method   _empty

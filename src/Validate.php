@@ -36,7 +36,7 @@ class Validate extends \think\Validate
      */
     protected function existPid($value, $rule, $data, $field, $title)
     {
-        if ($value == 0) {
+        if (intval($value) == 0) {
             return true;
         }
         if (is_string($rule)) {
