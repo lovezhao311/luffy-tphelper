@@ -21,12 +21,12 @@ class Controller extends \think\Controller
      * @DateTime 2017-03-02T15:28:09+0800
      * @return   [type]                   [description]
      */
-    protected function search($query,$special="")
+    protected function search($query, $special = "")
     {
         // 通过控制器去找对应search过滤规则
-        if(empty($special)){
+        if (empty($special)) {
             $search = $this->request->controller();
-        }else{
+        } else {
             $search = $special;
         }
         try {
@@ -74,9 +74,6 @@ class Controller extends \think\Controller
             throw new Exception($e->getMessage());
         }
     }
-
-
-
 
     /**
      * [_empty description]
