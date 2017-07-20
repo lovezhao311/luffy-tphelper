@@ -4,9 +4,9 @@ namespace luffyzhao\helper;
 use think\Config;
 use think\db\Query;
 use think\Exception;
+use think\Loader;
 use think\Model;
 use think\View;
-use think\Loader;
 
 /**
  * 用法
@@ -66,14 +66,14 @@ class Search
      * @param $query
      * @throws Exception
      */
-    public  function  setQuery($query){
+    public function setQuery($query)
+    {
         if (!($query instanceof Query)) {
             throw new Exception('参数错误！');
         }
         //
         $this->query = $query;
     }
-
 
     /**
      * 执行搜索
